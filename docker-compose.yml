@@ -1,0 +1,34 @@
+services:
+    next_web_app:
+        build:
+            dockerfile: ./next_web/docker/Dockerfile
+        ports:
+            - "${NEXT_WEB_APP_PORT}:3000"
+        volumes:
+            - "./next_web:/var/www"
+            - ".env:/var/www/.env"
+        depends_on:
+            mongodb:
+                condition: service_healthy
+    mongodb:
+        image: mongo
+        ports:
+            - "${NEXT_WEB_DB_PORT}:27017"
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${NEXT_WEB_DB_ROOT_NAME}
+            MONGO_INITDB_ROOT_PASSWORD: ${NEXT_WEB_DB_ROOT_PASSWORD}
+        restart: always
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "mongosh",
+                    "--norc",
+                    "--quiet",
+                    "--host=localhost:27017",
+                    "--eval",
+                    "db.getMongo()",
+                ]
+            interval: 3s
+            timeout: 10s
+            retries: 5
