@@ -1,4 +1,7 @@
-pub fn binary_search(list: Vec<i32>, target: i32) -> Result<usize, ()> {
+pub fn binary_search<T>(list: Vec<T>, target: T) -> Result<usize, ()>
+where
+    T: Ord,
+{
     if list.len() == 0 {
         return Err(());
     }
@@ -18,11 +21,10 @@ pub fn binary_search(list: Vec<i32>, target: i32) -> Result<usize, ()> {
         }
 
         let tested_position: usize = (left + right) / 2;
-        let tested_value: i32 = list[tested_position];
 
-        if target == tested_value {
+        if target == list[tested_position] {
             return Ok(tested_position);
-        } else if target < tested_value {
+        } else if target < list[tested_position] {
             right = tested_position - 1;
         } else {
             left = tested_position + 1;
