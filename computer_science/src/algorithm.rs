@@ -1,3 +1,5 @@
+// TODO: make list generic
+// TODO: add unit test
 pub fn binary_search<T>(list: Vec<T>, target: T) -> Result<usize, ()>
 where
     T: Ord,

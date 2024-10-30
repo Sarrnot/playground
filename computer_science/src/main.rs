@@ -1,6 +1,7 @@
 use algorithm::binary_search;
 
 mod algorithm;
+mod data_structure;
 
 fn main() {
     let search_message = match binary_search(vec![1, 3, 5], 5) {
