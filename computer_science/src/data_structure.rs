@@ -70,10 +70,7 @@ impl<T, const N: usize> CircularArray<T, N> {
     }
 
     fn increment_front(&mut self) {
-        self.front = match self.front == N - 1 {
-            true => 0,
-            false => self.front + 1,
-        };
+        self.front = Self::get_next_index(self.front);
     }
 
     fn decrement_front(&mut self) {
@@ -81,5 +78,49 @@ impl<T, const N: usize> CircularArray<T, N> {
             true => N - 1,
             false => self.front - 1,
         };
+    }
+
+    fn get_next_index(index: usize) -> usize {
+        match index == N - 1 {
+            true => 0,
+            false => index + 1,
+        }
+    }
+}
+
+impl<T, const N: usize> IntoIterator for CircularArray<T, N> {
+    type Item = T;
+    type IntoIter = CircularArrayIterator<T, N>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let item_index = self.front;
+        CircularArrayIterator::<T, N> {
+            array: self,
+            item_index,
+            iteration_index: 0,
+        }
+    }
+}
+
+pub struct CircularArrayIterator<T, const N: usize> {
+    array: CircularArray<T, N>,
+    item_index: usize,
+    iteration_index: usize,
+}
+
+impl<T, const N: usize> Iterator for CircularArrayIterator<T, N> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.iteration_index == self.array.size {
+            return None;
+        }
+
+        let item = unsafe { self.array.items[self.item_index].assume_init_read() };
+
+        self.item_index = CircularArray::<T, N>::get_next_index(self.item_index);
+        self.iteration_index += 1;
+
+        Some(item)
     }
 }
