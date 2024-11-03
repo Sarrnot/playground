@@ -1,6 +1,5 @@
 use std::mem::MaybeUninit;
 
-// TODO: add unit test
 pub struct CircularArray<T, const N: usize> {
     front: usize,
     size: usize,
@@ -56,7 +55,7 @@ impl<T, const N: usize> CircularArray<T, N> {
             return None;
         }
 
-        let value = unsafe { self.items[self.back() - 1].assume_init_read() };
+        let value = unsafe { self.items[Self::get_prev_index(self.back())].assume_init_read() };
         self.size -= 1;
         Some(value)
     }
@@ -74,16 +73,20 @@ impl<T, const N: usize> CircularArray<T, N> {
     }
 
     fn decrement_front(&mut self) {
-        self.front = match self.front == 0 {
-            true => N - 1,
-            false => self.front - 1,
-        };
+        self.front = Self::get_prev_index(self.front);
     }
 
     fn get_next_index(index: usize) -> usize {
         match index == N - 1 {
             true => 0,
             false => index + 1,
+        }
+    }
+
+    fn get_prev_index(index: usize) -> usize {
+        match index == 0 {
+            true => N - 1,
+            false => index - 1,
         }
     }
 }
@@ -122,5 +125,73 @@ impl<T, const N: usize> Iterator for CircularArrayIterator<T, N> {
         self.iteration_index += 1;
 
         Some(item)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn can_push() -> Result<(), ()> {
+        let mut array = CircularArray::<i32, 4>::new();
+        array.push_back(5)?;
+        array.push_back(8)?;
+        array.push_front(4)?;
+        array.push_front(2)?;
+
+        let should_be_array = [2, 4, 5, 8];
+        for (i, item) in array.into_iter().enumerate() {
+            assert_eq!(item, should_be_array[i]);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn can_pop() -> Result<(), ()> {
+        let mut array = CircularArray::<i32, 4>::new();
+        array.push_back(1)?;
+        array.push_back(4)?;
+        array.push_back(6)?;
+        array.push_back(7)?;
+        array.pop_front();
+        array.pop_back();
+
+        let should_be_array = [4, 6];
+        for (i, item) in array.into_iter().enumerate() {
+            assert_eq!(item, should_be_array[i]);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn handles_overflow() -> Result<(), ()> {
+        let mut array = CircularArray::<i32, 1>::new();
+        array.push_back(1)?;
+        let result = array.push_back(2);
+        assert_eq!(result, Err(()));
+
+        let result = array.push_front(2);
+        assert_eq!(result, Err(()));
+
+        Ok(())
+    }
+
+    #[test]
+    fn gets_correct_size() -> Result<(), ()> {
+        let mut array = CircularArray::<i32, 2>::new();
+        assert_eq!(array.len(), 0);
+        array.push_back(1)?;
+        assert_eq!(array.len(), 1);
+        array.push_front(2)?;
+        assert_eq!(array.len(), 2);
+        array.pop_back();
+        assert_eq!(array.len(), 1);
+        array.pop_front();
+        assert_eq!(array.len(), 0);
+
+        Ok(())
     }
 }
