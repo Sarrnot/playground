@@ -1,5 +1,8 @@
 use std::collections::LinkedList;
 
+// Can be implemented by a singly-linked list or a dynamic array -> different performance in different scenarios.
+// Linked list - O(1) push/pop but requires a new allocation with each push (can be expensive)
+// Dynamic array - better overall performance (amortized O(1) push/pop with no allocation) but O(n) when growing
 pub struct Stack<T> {
     items: LinkedList<T>,
 }
