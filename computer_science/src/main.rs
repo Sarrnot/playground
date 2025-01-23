@@ -1,4 +1,4 @@
-use algorithm::binary_search;
+use algorithm::binary_search::binary_search;
 
 mod algorithm;
 mod data_structure;
