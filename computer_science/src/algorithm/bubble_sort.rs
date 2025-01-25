@@ -1,4 +1,4 @@
-pub fn selection_sort<T>(list: &mut Vec<T>)
+pub fn bubble_sort<T>(list: &mut Vec<T>)
 where
     T: Ord,
 {
@@ -7,19 +7,11 @@ where
     }
 
     for i in 0..list.len() {
-        let mut min_value_index = i;
-
-        for j in (i + 1)..list.len() {
-            if list[j] < list[min_value_index] {
-                min_value_index = j;
+        for j in 0..(list.len() - i - 1) {
+            if list[j] > list[j + 1] {
+                list.swap(j, j + 1);
             }
         }
-
-        if min_value_index == i {
-            continue;
-        }
-
-        list.swap(min_value_index, i);
     }
 }
 
@@ -30,7 +22,7 @@ mod tests {
     #[test]
     fn sorts() {
         let mut list = vec![4, 6, 2, 9, 1, 0, 3, 3];
-        selection_sort(&mut list);
+        bubble_sort(&mut list);
 
         let should_be_array = [0, 1, 2, 3, 3, 4, 6, 9];
         for (i, item) in list.into_iter().enumerate() {
@@ -41,14 +33,14 @@ mod tests {
     #[test]
     fn handles_empty() {
         let mut list: Vec<i32> = vec![];
-        selection_sort(&mut list);
+        bubble_sort(&mut list);
         assert!(list.is_empty());
     }
 
     #[test]
     fn handles_single_value() {
         let mut list: Vec<i32> = vec![1];
-        selection_sort(&mut list);
+        bubble_sort(&mut list);
         assert_eq!(list.len(), 1);
         assert_eq!(list[0], 1);
     }
